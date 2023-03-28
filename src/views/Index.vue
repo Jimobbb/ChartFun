@@ -1,8 +1,8 @@
 <template lang="pug">
   div
     .screen
-      .logo ChartFun
-      .desc 一站式数据大屏制作平台
+      .logo ChartFriend
+      .desc 数据可视化编辑平台
       transition(name="slide-fade")
         .login-box(v-if="show")
           .radio-group
@@ -45,7 +45,10 @@ export default {
         }
       } else {
         // 开始检查
+        console.log('开始检查')
+        console.log('this.form', this.form)
         const md5pass = md5(this.form.password); // 对密码进行MD5加密
+        console.log('md5pass', md5pass)
         this.$http
           .post(`/user/${this.tab}`, {
             user: this.form.user,

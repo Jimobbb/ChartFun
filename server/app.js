@@ -43,7 +43,7 @@ app.use(cors());
 
 router.get('/', (ctx, next) => {
   // ctx.router available
-  ctx.body = 'Hello ChartFun!';
+  ctx.body = 'Hello ChartFriend!';
 });
 
 app.use(apiRouter.routes()).use(apiRouter.allowedMethods());
