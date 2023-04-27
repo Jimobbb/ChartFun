@@ -41,6 +41,13 @@ const router = new Router({
           },
         },
         {
+          path: 'model',
+          component: () => import('./views/Console/Model.vue'),
+          meta: {
+            title: '模型管理',
+          },
+        },
+        {
           path: '',
           redirect: 'chart',
         },
