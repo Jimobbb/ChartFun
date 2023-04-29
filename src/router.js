@@ -74,6 +74,14 @@ const router = new Router({
         title: '大屏查看 | ChartFriend',
       },
     },
+    {
+      path: '/editModel/:id',
+      name: 'editModel',
+      component: () => import('./views/EditModel/Canvas.vue'),
+      meta: {
+        title: '模型编辑',
+      },
+    },
   ],
 });
 
