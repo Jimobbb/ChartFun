@@ -1,6 +1,5 @@
 <template lang="pug">
   div
-
     el-row(:gutter="36")
       el-col(:span="6" v-for="item in chartList" :key="item._id")
       el-col(:span="6")
