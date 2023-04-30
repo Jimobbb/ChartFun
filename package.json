@@ -9,6 +9,7 @@
     "test:e2e": "vue-cli-service test:e2e"
   },
   "dependencies": {
+    "@antv/g6": "^4.8.10",
     "axios": "^0.21.2",
     "dayjs": "^1.8.14",
     "echarts": "^4.2.1",
