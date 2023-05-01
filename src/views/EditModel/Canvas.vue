@@ -1,10 +1,43 @@
 <template>
     <div class="flowchart">
-        <el-button type="primary" @click="handleAddNode">Add Node</el-button>
-        <!-- <el-button type="primary" @click="handleAddEdge">Add Edge</el-button> -->
-        <el-button type="primary" @click="deleteNode">Delete Node</el-button>
-        <el-button type="primary" @click="deleteEdge">Delete Edge</el-button>
+        <el-tooltip effect="dark" content="点击添加节点，单机节点可通过拖拽创建连接线" placement="top">
+            <el-button type="primary" @click="dialogVisible = true">添加节点</el-button>
+        </el-tooltip>
+        <el-tooltip effect="dark" placement="top">
+            <div slot="content">
+                选中节点或连接线，在高亮模式下可以删除节点或连接线<br/>若节点删除，则其连接线也会删除
+            </div>
+            <el-button type="warning" @click="deleteNode">删除节点或连接</el-button>
+        </el-tooltip>
+        <el-tooltip effect="dark" content="将模板以png图片格式输出成素材" placement="top">
+            <el-button type="success" @click="downloadImage">下载模板</el-button>
+        </el-tooltip>
+        <el-tooltip effect="dark" content="保存模板" placement="top">
+            <el-button type="info" @click="saveModel">保存模板</el-button>
+        </el-tooltip>
         <div ref="container" class="flowchart-container"></div>
+        <el-dialog
+            title="提示"
+            :visible.sync="dialogVisible"
+            width="30%"
+            :before-close="handleClose">
+            <el-form ref="form" :model="form" label-width="80px">
+                <el-form-item label="节点名称">
+                    <el-input v-model="form.name"></el-input>
+                </el-form-item>
+                <el-form-item label="节点类型">
+                    <el-select v-model="form.type" placeholder="请选择节点类型">
+                        <el-option label="开始/终止" value="terminal"></el-option>
+                        <el-option label="流程" value="process"></el-option>
+                        <el-option label="判断" value="decision"></el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="cancelAddNode">取 消</el-button>
+                <el-button type="primary" @click="handleAddNode">确 定</el-button>
+            </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -17,7 +50,31 @@ export default {
     name: "FlowChart",
     data() {
       return {
-        dagreData: [],
+        nodeCfg: {
+            'terminal' : {
+                type: 'rect',
+                style: {
+                    radius: 20
+                }
+            },
+            'process' : {
+                type: 'rect',
+                style: {
+                    radius: 0
+                }
+            },
+            'decision' : {
+                type: 'diamond',
+                style: {
+                    radius: 0
+                }
+            },
+        },
+        dialogVisible: false,
+        form: {
+            name: '',
+            type: ''
+        }
       };
     },
     created() {
@@ -27,218 +84,12 @@ export default {
       });
     },
     methods: {
-    //   init() {
-    //     G6.registerEdge('relation', {
-    //         draw: function draw(cfg, group) {
-    //             var keyShape = group.addShape('path', {
-    //                     attrs: {
-    //                     path: [['M', cfg.startPoint.x, cfg.startPoint.y], ['L', cfg.endPoint.x, cfg.endPoint.y]],
-    //                     stroke: '#666',
-    //                     lineWidth: 2,
-    //                     lineAppendWidth: 4
-    //                 }
-    //             });
-    //             var center = keyShape.getPoint(0.5);
-    //             var shapeContainer = group.addGroup();
-
-    //             var point = G6.Util.getLabelPosition(keyShape, 0, 10, 4, true);
-    //             group.addShape('text', {
-    //                 attrs: {
-    //                 text: cfg.sourceEntity,
-    //                 x: point.x,
-    //                 y: point.y,
-    //                 rotate: point.rotate,
-    //                 fill: '#666'
-    //                 }
-    //             });
-    //             point = G6.Util.getLabelPosition(keyShape, 1, -15, 4, true);
-    //             group.addShape('text', {
-    //                 attrs: {
-    //                 text: cfg.targetEntity,
-    //                 x: point.x,
-    //                 y: point.y,
-    //                 fill: '#666',
-    //                 rotate: point.rotate
-    //                 }
-    //             });
-    //             shapeContainer.transform([['t', -center.x, -center.y], ['r', point.angle], ['t', center.x, center.y]]);
-    //             shapeContainer.addShape('path', {
-    //                 attrs: {
-    //                 path: [['M', center.x - 40, center.y], ['L', center.x, center.y - 20], ['L', center.x + 40, center.y], ['L', center.x, center.y + 20], ['Z']],
-    //                 fill: '#fff',
-    //                 stroke: '#666'
-    //                 }
-    //             });
-    //             shapeContainer.addShape('text', {
-    //                 attrs: {
-    //                 text: cfg.relation,
-    //                 x: center.x,
-    //                 y: center.y,
-    //                 textAlign: 'center',
-    //                 textBaseline: 'middle',
-    //                 fill: '#666'
-    //                 }
-    //             });
-    //             return keyShape;
-    //         }
-    //     });
-    //     var graph = new G6.Graph({
-    //         container: 'mountNode',
-    //         width: 800,
-    //         height: 500,
-    //         modes: {
-    //         default: ['drag-node', 'drag-canvas', 'zoom-canvas']
-    //         }
-    //     });
-    //     var data = {
-    //         nodes: [{
-    //         id: 'customer',
-    //         label: 'customer',
-    //         x: 200,
-    //         y: 200,
-    //         shape: 'rect',
-    //         size: [60, 40]
-    //     }, {
-    //         id: 'customer_id',
-    //         label: 'customer_id',
-    //         x: 120,
-    //         y: 160,
-    //         shape: 'ellipse',
-    //         size: [80, 40]
-    //     }, {
-    //         id: 'name',
-    //         label: 'name',
-    //         x: 140,
-    //         y: 100,
-    //         shape: 'ellipse',
-    //         size: [80, 40]
-    //     }, {
-    //         id: 'address',
-    //         label: 'address',
-    //         x: 180,
-    //         y: 60,
-    //         shape: 'ellipse',
-    //         size: [80, 40]
-    //     }, {
-    //         id: 'email',
-    //         label: 'email',
-    //         x: 240,
-    //         y: 110,
-    //         shape: 'ellipse',
-    //         size: [80, 40]
-    //     }, {
-    //         id: 'order',
-    //         label: 'order',
-    //         x: 400,
-    //         y: 200,
-    //         shape: 'rect',
-    //         size: [60, 40]
-    //     }, {
-    //         id: 'order_id',
-    //         label: 'order_id',
-    //         x: 320,
-    //         y: 130,
-    //         shape: 'ellipse',
-    //         size: [80, 40]
-    //     }, {
-    //         id: 'order_status',
-    //         label: 'order_status',
-    //         x: 380,
-    //         y: 80,
-    //         shape: 'ellipse',
-    //         size: [80, 40]
-    //     }, {
-    //         id: 'total_price',
-    //         label: 'total_price',
-    //         x: 440,
-    //         y: 150,
-    //         shape: 'ellipse',
-    //         size: [80, 40]
-    //     }, {
-    //         id: 'employee',
-    //         label: 'employee',
-    //         x: 380,
-    //         y: 380,
-    //         shape: 'rect',
-    //         size: [60, 40]
-    //     }, {
-    //         id: 'employee_id',
-    //         label: 'employee_id',
-    //         x: 320,
-    //         y: 440,
-    //         shape: 'ellipse',
-    //         size: [80, 40]
-    //     }, {
-    //         id: 'title',
-    //         label: 'title',
-    //         x: 440,
-    //         y: 440,
-    //         shape: 'ellipse',
-    //         size: [80, 40]
-    //     }],
-    //         edges: [{
-    //         id: 'c_id',
-    //         source: 'customer',
-    //         target: 'customer_id'
-    //     }, {
-    //         id: 'c_name',
-    //         source: 'customer',
-    //         target: 'name'
-    //     }, {
-    //         id: 'c_address',
-    //         source: 'customer',
-    //         target: 'address'
-    //     }, {
-    //         id: 'c_email',
-    //         source: 'customer',
-    //         target: 'email'
-    //     }, {
-    //         id: 'o_id',
-    //         source: 'order',
-    //         target: 'order_id'
-    //     }, {
-    //         id: 'o_price',
-    //         source: 'order',
-    //         target: 'total_price'
-    //     }, {
-    //         id: 'o_status',
-    //         source: 'order',
-    //         target: 'order_status'
-    //     }, {
-    //         id: 'c_o',
-    //         source: 'customer',
-    //         target: 'order',
-    //         relation: 'places',
-    //         sourceEntity: '1',
-    //         targetEntity: 'N',
-    //         shape: 'relation'
-    //     }, {
-    //         id: 'o_e',
-    //         source: 'employee',
-    //         target: 'order',
-    //         relation: 'finalize',
-    //         sourceEntity: '1',
-    //         targetEntity: 'N',
-    //         shape: 'relation'
-    //     }, {
-    //         id: 'e_id',
-    //         source: 'employee',
-    //         target: 'employee_id'
-    //     }, {
-    //         id: 'e_title',
-    //         source: 'employee',
-    //         target: 'title'
-    //     }]
-    //     };
-    //     graph.data(data);
-    //     graph.render();
-    //   },
       initG6() {
         const _this = this;
         this.graph = new G6.Graph({
             container: _this.$refs.container,
-            width: 800,
-            height: 800,
+            width: 600,
+            height: 600,
             modes: {
                 default: [
                     'drag-canvas', 
@@ -246,6 +97,12 @@ export default {
                     {
                         type: 'create-edge',
                         trigger: 'click',
+                        edgeConfig: {
+                            style: {
+                                stroke: '#afafaf',
+                                lineWidth: 5,
+                            }
+                        }
                     }
                 ],
                 editNode: [
@@ -278,12 +135,12 @@ export default {
                     fill: '#C6E5FF',
                     stroke: '#5B8FF9',
                     lineWidth: 2,
-                    radius: 5,
+                    // radius: 20,
                 },
                 labelCfg: {
                     style: {
-                    fill: '#1890ff',
-                    fontSize: 14,
+                        fill: '#1890ff',
+                        fontSize: 14,
                     },
                 },
             },
@@ -355,37 +212,73 @@ export default {
         }
 );
       },
+      handleClose(done) {
+        this.$confirm('确认关闭？')
+          .then(_ => {
+            done();
+          })
+          .catch(_ => {});
+      },
+      cancelAddNode(formName) {
+        this.form = {
+            name: '',
+            type: ''
+        }
+        this.dialogVisible = false
+      },
       handleAddNode() {
-        this.$prompt('输入节点名称', '创建节点', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-        })
-            .then((value) => {
-                this.graph.addItem('node', {
-                    id: `node-${Math.random()}`,
-                    label: value.value,
-                    x: 100,
-                    y: 100,
-                });
-            })
-            .catch(() => {});
+        console.log('看看', this.form.type, this.nodeCfg[this.form.type].type);
+        this.graph.addItem('node', {
+            type: this.nodeCfg[this.form.type].type,
+            id: `node-${Math.random()}`,
+            label: this.form.name,
+            style: this.nodeCfg[this.form.type].style,
+            x: 100,
+            y: 100,
+        });
+        // this.form = {
+        //     name: '',
+        //     type: ''
+        // }
+        this.dialogVisible = false
       },
       deleteNode() {
-        console.log('getNode', this.graph.getNodes())
+        // console.log('getNode', this.graph.getNodes())
         this.graph.getNodes().forEach((node) => {
-            console.log(node.hasState('selected'));
-            console.log('remove', node._cfg);
-            this.graph.removeItem(node);
+            // console.log(node.hasState('selected'));
+            // console.log('remove', node._cfg);
+            if(node.hasState('selected')) {
+                this.graph.removeItem(node);
+            }
+            this.graph.clearItemStates(node);
         });
-      },
-      deleteEdge() {
         this.graph.getEdges().forEach((edge) => {
-            this.graph.removeItem(edge);
+            if(edge.hasState('selected')) {
+                this.graph.removeItem(edge);
+            }
+            this.graph.clearItemStates(edge);
         });
       },
       downloadImage() {
-        graph.downloadFullImage(Math.random().toString(16));
+        this.graph.downloadFullImage(Math.random().toString(16));
       },
+      saveModel() {
+        this.$confirm('确定上传模板至数据库吗？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.$message({
+            type: 'success',
+            message: '上传成功!'
+          });
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '上传失败'
+          });          
+        });
+      }
     },
   };
 </script>
@@ -396,10 +289,11 @@ export default {
 }
 
 .flowchart-container {
+  margin-top: 20px;
   border: 5px solid #ccc;
   border-radius: 5px;
-  width: 800px;
-  height: 800px;
-//   overflow: auto;
+  max-width: 600px;
+//   height: 600px;
+  overflow: auto;
 }
 </style>

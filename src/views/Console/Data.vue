@@ -41,6 +41,7 @@ export default {
           const { errno, data } = res.data;
           if (errno === 0) {
             this.connectList = data.connectList;
+            console.log('this.connectList', this.connectList);
           }
         })
         .catch(() => {});

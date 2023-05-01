@@ -1,11 +1,26 @@
 <template lang="pug">
+  //- div
+  //-   el-row(:gutter="36")
+  //-     el-col(:span="6" v-for="item in chartList" :key="item._id")
+  //-     el-col(:span="6")
+  //-       el-card(:body-style="{ padding: '0px' }" shadow="hover" @click.native="addNewModel")
+  //-           .add-card
+  //-             i.el-icon-circle-plus
   div
-    el-row(:gutter="36")
-      el-col(:span="6" v-for="item in chartList" :key="item._id")
-      el-col(:span="6")
-        el-card(:body-style="{ padding: '0px' }" shadow="hover" @click.native="addNewModel")
-            .add-card
-              i.el-icon-circle-plus
+    el-row(style="margin-bottom: 20px;")
+      el-button(type="primary" @click="addNewModel") 新增模型
+    el-table(:data="modelList")
+      el-table-column(prop="_id" label="id")
+        template(slot-scope="scope")
+          span {{ scope.row._id | simplifyID }}
+      el-table-column(prop="name" label="名称")
+      el-table-column(prop="createdAt" label="上传时间")
+        template(slot-scope="scope")
+          span {{ $dayjs(scope.row.createdAt).format('YYYY-MM-DD HH:mm') }}
+      el-table-column(label="操作")
+        template(slot-scope="scope")
+          el-button(type="text" size="small" @click="renameData(scope.row)") 重命名
+          el-button(type="text" size="small" @click="deleteData(scope.row._id)") 删除
 </template>
 
 <script>
@@ -62,6 +77,57 @@ export default {
           this.editModel(value);
         })
         .catch(() => {});
+    },
+    renameData(row) {
+      this.$prompt('输入模型名称', '重命名', {
+        inputValue: row.name,
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+      })
+        .then(({ value }) => {
+          // this.$http
+          //   .put(`/connect/${row._id}`, {
+          //     name: value
+          //   })
+          //   .then(res => {
+          //     const { errno, data } = res.data;
+          //     if (errno === 0) {
+          //       this.$message({
+          //         type: 'success',
+          //         message: '保存成功'
+          //       });
+          //       setTimeout(() => {
+          //         this.getData();
+          //       }, 100);
+          //       // this.editChart(data._id);
+          //     }
+          //   })
+          //   .catch(() => {});
+        })
+        .catch(() => {});
+    },
+    deleteData(id) {
+      this.$confirm('是否删除当前模型？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        // this.$http
+        //   .delete(`/connect/${id}`)
+        //   .then(res => {
+        //     const { errno, data } = res.data;
+        //     if (errno === 0) {
+        //       this.$message({
+        //         type: "success",
+        //         message: "已删除"
+        //       });
+        //       setTimeout(() => {
+        //         this.getData();
+        //       }, 100);
+        //       // this.editChart(data._id);
+        //     }
+        //   });
+      }).catch(() => {});
     },
   }
 };
